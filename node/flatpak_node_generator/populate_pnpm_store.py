@@ -363,6 +363,14 @@ def _process_tarball(
                 (url_key, entry_bytes),
             )
 
+            # pnpm looks up tarball URL packages with integrity by
+            # {integrity}\t{tarball_url} — see pickStoreIndexKey in @pnpm/store.index.
+            integrity_url_key = f'{integrity_algo}-{integrity}\t{tarball_url}'
+            index_db.execute(
+                'INSERT OR REPLACE INTO package_index (key, data) VALUES (?, ?)',
+                (integrity_url_key, entry_bytes),
+            )
+
             # pnpm looks up git-hosted tarballs (codeload.github.com,
             # bitbucket.org, gitlab.com) and tarballs without integrity by
             # {tarball_url}\tbuilt(not-built) — see pickStoreIndexKey in @pnpm/store.index.

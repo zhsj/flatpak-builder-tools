@@ -22,7 +22,7 @@ class Requests:
     @contextlib.asynccontextmanager
     async def _open_stream(self, url: str) -> AsyncIterator[aiohttp.StreamReader]:
         async with (
-            aiohttp.ClientSession(raise_for_status=True) as session,
+            aiohttp.ClientSession(raise_for_status=True, trust_env=True) as session,
             session.get(url) as response,
         ):
             yield response.content

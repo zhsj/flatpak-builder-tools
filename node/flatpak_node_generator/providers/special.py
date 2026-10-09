@@ -298,6 +298,9 @@ class SpecialSourceProvider:
             )
 
     async def _handle_ripgrep_prebuilt(self, package: Package) -> None:
+        if SemVer.parse(package.version) >= SemVer.parse('1.18.0'):
+            return
+
         async def get_ripgrep_tag(version: str) -> str:
             url = f'https://github.com/microsoft/vscode-ripgrep/raw/v{version}/lib/postinstall.js'
             tag_re = re.compile(r"VERSION\s+=\s+'(v[\d.-]+)';")
@@ -337,8 +340,9 @@ class SpecialSourceProvider:
             )
 
     async def _handle_playwright(self, package: Package) -> None:
-        base_url = f'https://github.com/microsoft/playwright/raw/v{package.version}/'
-        if SemVer.parse(package.version) >= SemVer.parse('1.16.0'):
+        tag_ver = package.version.split("-")[0]
+        base_url = f'https://github.com/microsoft/playwright/raw/v{tag_ver}/'
+        if SemVer.parse(tag_ver) >= SemVer.parse('1.16.0'):
             browsers_json_url = base_url + 'packages/playwright-core/browsers.json'
         else:
             browsers_json_url = base_url + 'browsers.json'

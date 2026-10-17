@@ -132,6 +132,9 @@ class PnpmLockfileProvider(LockfileProvider):
 
             name, version = parsed
 
+            if version.startswith('file:'):
+                continue
+
             # NOTE v6/v7: dev packages have dev: true directly on the entry
             if self.no_devel and info.get('dev', False):
                 continue

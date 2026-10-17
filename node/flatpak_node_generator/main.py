@@ -36,7 +36,8 @@ async def _async_main() -> None:
     parser.add_argument('type', choices=['npm', 'yarn', 'pnpm'])
     parser.add_argument(
         'lockfile',
-        help='The lockfile path (package-lock.json, yarn.lock, or pnpm-lock.yaml)',
+        nargs='+',
+        help='The lockfile path(s) (package-lock.json, yarn.lock, or pnpm-lock.yaml)',
     )
     parser.add_argument(
         '-o',
@@ -185,16 +186,18 @@ async def _async_main() -> None:
 
     lockfiles: list[Path]
     if args.recursive or args.recursive_pattern:
+        if len(args.lockfile) > 1:
+            sys.exit("-r/-R is only supported with a single lockfile.")
         lockfiles = list(
-            _scan_for_lockfiles(Path(args.lockfile), args.recursive_pattern)
+            _scan_for_lockfiles(Path(args.lockfile[0]), args.recursive_pattern)
         )
         if not lockfiles:
             sys.exit('No lockfiles found.')
         print(f'Found {len(lockfiles)} lockfiles.')
     else:
-        lockfiles = [Path(args.lockfile)]
+        lockfiles = [Path(lf) for lf in args.lockfile]
 
-    lockfile_root = Path(args.lockfile).parent
+    lockfile_root = Path(os.path.commonpath([str(lf.parent) for lf in lockfiles]))
 
     provider_factory: ProviderFactory
     if args.type == 'npm':
